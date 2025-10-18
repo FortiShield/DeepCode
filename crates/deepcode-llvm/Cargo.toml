@@ -1,0 +1,20 @@
+[package]
+authors                = ["KhulnaSoft Ltd."]
+categories             = ["api-bindings", "external-ffi-bindings"]
+description            = "Rust bindings for LLVM libraries used by CubeCL."
+edition.workspace      = true
+keywords               = ["deepcl", "llvm", "mlir", "bindings"]
+license.workspace      = true
+name                   = "deepcode-llvm"
+readme.workspace       = true
+repository             = "https://github.com/kothagpt/deepcode/tree/main/crates/deepcode-llvm"
+rust-version.workspace = true
+version.workspace      = true
+
+[features]
+mlir-helpers      = ["deepcode-mlir-rs/helpers"]
+mlir-ods-dialects = ["deepcode-mlir-rs/ods-dialects"]
+
+[dependencies]
+deepcode-mlir-rs  = { path = "../deepcode-mlir-rs", version = "20.1.4-5" }
+deepcode-mlir-sys = { path = "../deepcode-mlir-sys", version = "20.1.4-5" }

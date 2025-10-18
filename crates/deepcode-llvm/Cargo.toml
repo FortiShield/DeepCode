@@ -18,3 +18,16 @@ mlir-ods-dialects = ["deepcode-mlir-rs/ods-dialects"]
 [dependencies]
 deepcode-mlir-rs  = { path = "../deepcode-mlir-rs", version = "20.1.4-5" }
 deepcode-mlir-sys = { path = "../deepcode-mlir-sys", version = "20.1.4-5" }
+
+[dev-dependencies]
+tempfile = "3.8"
+serial_test = "3.0"
+
+[[test]]
+name = "integration_tests"
+path = "tests/integration_tests.rs"
+
+[profile.test]
+opt-level = 1
+debug = true
+overflow-checks = true

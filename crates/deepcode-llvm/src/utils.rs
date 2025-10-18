@@ -62,3 +62,129 @@ pub fn initialize_llvm() -> Result<(), crate::error::Error> {
     }
     Ok(())
 }
+
+// Unit tests for utility functions
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_cstring_from_str_valid() {
+        let result = cstring_from_str("valid_string");
+        assert!(result.is_ok());
+
+        let cstring = result.unwrap();
+        assert_eq!(cstring.to_str().unwrap(), "valid_string");
+    }
+
+    #[test]
+    fn test_cstring_from_str_invalid() {
+        // CString::new fails on strings containing null bytes
+        let result = cstring_from_str("invalid\0string");
+        assert!(result.is_err());
+
+        match result.unwrap_err() {
+            crate::error::Error::IrGenerationFailed(msg) => {
+                assert!(msg.contains("Invalid string for C FFI"));
+            }
+            _ => panic!("Expected IrGenerationFailed error"),
+        }
+    }
+
+    #[test]
+    fn test_cstring_from_str_empty() {
+        let result = cstring_from_str("");
+        assert!(result.is_ok());
+
+        let cstring = result.unwrap();
+        assert_eq!(cstring.to_str().unwrap(), "");
+    }
+
+    #[test]
+    fn test_llvm_bool_to_bool_true() {
+        assert_eq!(llvm_bool_to_bool(1), true);
+        assert_eq!(llvm_bool_to_bool(42), true); // Any non-zero value
+        assert_eq!(llvm_bool_to_bool(-1), true); // Negative values
+    }
+
+    #[test]
+    fn test_llvm_bool_to_bool_false() {
+        assert_eq!(llvm_bool_to_bool(0), false);
+    }
+
+    #[test]
+    fn test_bool_to_llvm_bool_true() {
+        assert_eq!(bool_to_llvm_bool(true), 1);
+    }
+
+    #[test]
+    fn test_bool_to_llvm_bool_false() {
+        assert_eq!(bool_to_llvm_bool(false), 0);
+    }
+
+    #[test]
+    fn test_llvm_version_structure() {
+        let version = LlvmVersion {
+            major: 20,
+            minor: 1,
+            patch: 4,
+        };
+
+        assert_eq!(version.major, 20);
+        assert_eq!(version.minor, 1);
+        assert_eq!(version.patch, 4);
+    }
+
+    #[test]
+    fn test_llvm_version_as_string() {
+        let version = LlvmVersion {
+            major: 20,
+            minor: 1,
+            patch: 4,
+        };
+
+        assert_eq!(version.as_string(), "20.1.4");
+    }
+
+    #[test]
+    fn test_llvm_version_zero() {
+        let version = LlvmVersion {
+            major: 0,
+            minor: 0,
+            patch: 0,
+        };
+
+        assert_eq!(version.as_string(), "0.0.0");
+    }
+
+    #[test]
+    fn test_initialize_llvm() {
+        // This test mainly checks that the function doesn't panic
+        // In a real environment with LLVM installed, this would initialize LLVM
+        let result = initialize_llvm();
+        // The result depends on whether LLVM is actually available
+        // For testing purposes, we'll just check it doesn't panic
+        let _ = result;
+    }
+
+    #[test]
+    fn test_bool_conversion_roundtrip() {
+        // Test that bool -> llvm_bool -> bool conversion works correctly
+        assert_eq!(llvm_bool_to_bool(bool_to_llvm_bool(true)), true);
+        assert_eq!(llvm_bool_to_bool(bool_to_llvm_bool(false)), false);
+    }
+
+    #[test]
+    fn test_cstring_edge_cases() {
+        // Test various edge cases for CString creation
+        assert!(cstring_from_str("normal_string").is_ok());
+        assert!(cstring_from_str("string_with_spaces").is_ok());
+        assert!(cstring_from_str("string-with-dashes").is_ok());
+        assert!(cstring_from_str("string_with_underscores").is_ok());
+
+        // Unicode strings should work
+        assert!(cstring_from_str("café").is_ok());
+        assert!(cstring_from_str("日本語").is_ok());
+    }
+}

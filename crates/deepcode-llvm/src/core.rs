@@ -76,3 +76,87 @@ impl Drop for Module {
         // The context disposal will handle module cleanup
     }
 }
+
+// Unit tests for core LLVM functionality
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_context_creation() {
+        let context = Context::new();
+        assert!(context.is_ok());
+    }
+
+    #[test]
+    fn test_context_as_ptr() {
+        let context = Context::new().unwrap();
+        let ptr = context.as_ptr();
+        assert!(!ptr.is_null());
+    }
+
+    #[test]
+    fn test_module_creation() {
+        let context = Context::new().unwrap();
+        let module = Module::new("test_module", &context);
+        assert!(module.is_ok());
+    }
+
+    #[test]
+    fn test_module_name() {
+        let context = Context::new().unwrap();
+        let module = Module::new("my_test_module", &context).unwrap();
+        assert_eq!(module.get_name(), "my_test_module");
+    }
+
+    #[test]
+    fn test_invalid_module_name() {
+        let context = Context::new().unwrap();
+        // Empty string should still work for module creation
+        let module = Module::new("", &context);
+        assert!(module.is_ok());
+    }
+
+    #[test]
+    fn test_context_drop() {
+        let context = Context::new().unwrap();
+        let ptr = context.as_ptr();
+        assert!(!ptr.is_null());
+
+        // Context should be dropped when going out of scope
+        drop(context);
+        // Note: We can't easily test that the context was disposed without
+        // accessing internal LLVM state, but the Drop implementation should handle it
+    }
+
+    #[test]
+    fn test_multiple_modules_same_context() {
+        let context = Context::new().unwrap();
+
+        let module1 = Module::new("module1", &context);
+        let module2 = Module::new("module2", &context);
+
+        assert!(module1.is_ok());
+        assert!(module2.is_ok());
+        assert_eq!(module1.unwrap().get_name(), "module1");
+        assert_eq!(module2.unwrap().get_name(), "module2");
+    }
+
+    #[test]
+    fn test_context_reuse() {
+        let context = Context::new().unwrap();
+
+        // Create first module
+        let module1 = Module::new("first", &context).unwrap();
+        assert_eq!(module1.get_name(), "first");
+
+        // Create second module with same context
+        let module2 = Module::new("second", &context).unwrap();
+        assert_eq!(module2.get_name(), "second");
+
+        // Both modules should be valid
+        assert_eq!(module1.get_name(), "first");
+        assert_eq!(module2.get_name(), "second");
+    }
+}

@@ -21,7 +21,7 @@ use std::{
 
 use bytemuck::{Pod, Zeroable};
 use deepcl_ir::ExpandElement;
-use derive_more::derive::{
+use derive_more::{
     Add, AddAssign, Display, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Sub, SubAssign,
 };
 use num_traits::{Num, NumCast, One, ToPrimitive, Zero};
@@ -30,6 +30,7 @@ use serde::Serialize;
 use crate::{
     ir::{ElemType, FloatKind, Scope, Variable},
     prelude::Numeric,
+    Runtime, compute::KernelLauncher,
 };
 
 use super::*;
@@ -369,11 +370,11 @@ impl<const POS: u8> Not for ElemExpand<POS> {
     }
 }
 
-impl<const POS: u8> Add for ElemExpand<POS> {
+impl<const POS: u8> std::ops::Neg for ElemExpand<POS> {
     type Output = Self;
 
-    fn add(self, rhs: Self) -> Self::Output {
-        ElemExpand(self.0 + rhs.0)
+    fn neg(self) -> Self::Output {
+        ElemExpand(-self.0)
     }
 }
 
@@ -642,12 +643,8 @@ impl<const POS: u8> One for ElemExpand<POS> {
     }
 }
 
-impl<const POS: u8> Zero for ElemExpand<POS> {
-    fn zero() -> Self {
-        ElemExpand(0.0)
-    }
-
-    fn is_zero(&self) -> bool {
-        self.0 == 0.0
+impl<const POS: u8> ScalarArgSettings for ElemExpand<POS> {
+    fn register<R: Runtime>(&self, settings: &mut KernelLauncher<R>) {
+        settings.register_f32(self.0);
     }
 }

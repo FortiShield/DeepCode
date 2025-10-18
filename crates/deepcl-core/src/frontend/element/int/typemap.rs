@@ -1,7 +1,7 @@
 use bytemuck::{Pod, Zeroable};
 use core::ops::*;
 use deepcl_ir::{ElemType, ExpandElement, IntKind, Scope, StorageType, Variable};
-use derive_more::derive::{
+use derive_more::{
     Add, AddAssign, BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Display, Div,
     DivAssign, Mul, MulAssign, Neg, Not, Rem, RemAssign, Shl, ShlAssign, Shr, ShrAssign, Sub,
     SubAssign,
@@ -284,12 +284,6 @@ impl<const POS: u8> ShlAssign<u32> for IntExpand<POS> {
 impl<const POS: u8> ShrAssign<u32> for IntExpand<POS> {
     fn shr_assign(&mut self, rhs: u32) {
         self.0 >>= rhs;
-    }
-}
-
-impl<const POS: u8> PartialEq for IntExpand<POS> {
-    fn eq(&self, other: &Self) -> bool {
-        self.0 == other.0
     }
 }
 

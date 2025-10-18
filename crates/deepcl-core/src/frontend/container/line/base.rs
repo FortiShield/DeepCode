@@ -10,7 +10,7 @@ use crate::{
 };
 use deepcl_ir::{Comparison, ExpandElement, StorageType};
 use deepcl_macros::{cube, intrinsic};
-use derive_more::derive::Neg;
+use derive_more::Neg;
 /// A contiguous list of elements that supports auto-vectorized operations.
 
 #[derive(Neg)]
